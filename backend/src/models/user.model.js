@@ -3,6 +3,7 @@ import { JobSeekerProfile } from "./jobSeekerProfile.model.js";
 import { CompanyProfile } from "./companyProfile.model.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+
 const userSchema = new Schema(
   {
     username: { type: String, required: true, unique: true },
@@ -51,6 +52,7 @@ userSchema.methods.generateAccessToken = function () {
     }
   );
 };
+
 userSchema.methods.generateRefreshToken = function () {
   return jwt.sign(
     {

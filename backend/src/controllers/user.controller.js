@@ -19,12 +19,21 @@ const authPing = (req, res) => {
 
 const cookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  secure: false,     // MUST be false for localhost (HTTP)
+  sameSite: "lax",   // REQUIRED for localhost
   maxAge: 1000 * 60 * 60 * 24 * 7,
-  domain:
-    process.env.NODE_ENV === "production" ? "noobnarayan.in" : "localhost",
 };
+
+
+
+// const cookieOptions = {
+//   httpOnly: true,
+//   secure: process.env.NODE_ENV === "production",
+//   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+//   maxAge: 1000 * 60 * 60 * 24 * 7,
+//   // domain:
+//   //   process.env.NODE_ENV === "production" ? "noobnarayan.in" : "localhost",
+// };
 
 const generateAccessAndRefereshTokens = async (userId) => {
   try {
@@ -254,7 +263,7 @@ const updateProfilePicture = asyncHandler(async (req, res) => {
   if (
     oldProfilePictureUrl &&
     oldProfilePictureUrl !=
-      "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg"
+    "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg"
   ) {
     try {
       const splitUrl = oldProfilePictureUrl.split("/");

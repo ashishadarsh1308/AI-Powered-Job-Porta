@@ -19,7 +19,6 @@ const router = Router();
 router.route("/ping").get(ping);
 router.route("/auth-ping").get(verifyJWT, authPing);
 
-//
 router.route("/jobs").get(getJobs);
 router.route("/jobs/:id?").get(getJobById);
 router.route("/jobs").post(verifyJWT, postJob);

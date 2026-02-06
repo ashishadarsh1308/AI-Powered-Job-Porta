@@ -5,23 +5,34 @@ import { userService } from "../../services/userService";
 import useUpdateUserData from "../../hooks/useUpdateUserData";
 
 function Signup() {
+  const navigate = useNavigate();
+  const updateUser = useUpdateUserData();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
-  const updateUser = useUpdateUserData();
 
   const [userType, setUserType] = useState("jobSeeker");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
   const resetErrorMessage = () => {
-    setTimeout(() => {
-      setErrorMessage("");
-    }, 5000);
+    setTimeout(() => setErrorMessage(""), 5000);
   };
 
+  // Handle input change
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // Handle submit
   const handleFormSubmission = (event) => {
     event.preventDefault();
 
@@ -30,65 +41,78 @@ function Signup() {
 
     if (!passwordPattern.test(formData.password)) {
       setErrorMessage(
-        "Password must include at least one uppercase letter, one lowercase letter, one digit, one special character, and be at least 6 characters long."
-      );
-
-      resetErrorMessage();
-    } else if (formData.password !== formData.confirmPassword) {
-      setErrorMessage(
-        "The passwords you entered don't match. Please check and try again."
+        "Password must include uppercase, lowercase, digit and special character."
       );
       resetErrorMessage();
-    } else {
-      postUserData(formData);
+      return;
     }
+
+    if (formData.password !== formData.confirmPassword) {
+      setErrorMessage("Passwords do not match.");
+      resetErrorMessage();
+      return;
+    }
+
+    postUserData(formData);
   };
 
-  const navigate = useNavigate();
-
+  // Signup flow
   const postUserData = async (data) => {
     setLoading(true);
+
     const { name, email, password } = data;
-    const userData = {
+
+    const payload = {
       email,
       password,
       role: userType === "employer" ? "employer" : "jobSeeker",
-      userProfile: userType === "employer" ? { companyName: name } : { name },
+      userProfile:
+        userType === "employer"
+          ? { companyName: name }
+          : { name },
     };
 
     try {
-      const res = await userService.signup(userData);
-      if (res.data.statusCode === 201) {
-        const res = await userService.login({ email, password });
-        if (res.status === 200) {
-          const userData = await userService.getCurrentUser();
-          if (userData) {
-            console.log(userData);
-            if (userData.role === "jobSeeker") {
-              navigate("/user-onboarding");
-            } else {
-              navigate("/company-onboarding");
-            }
+      console.log("1️⃣ Sending signup request...");
 
-            updateUser();
+      const signupRes = await userService.signup(payload);
+      console.log("2️⃣ Signup success:", signupRes);
+
+      if (signupRes) {
+        console.log("3️⃣ Logging in user...");
+
+        const loginRes = await userService.login({ email, password });
+        console.log("4️⃣ Login success:", loginRes);
+
+        if (loginRes) {
+          console.log("5️⃣ Updating user context...");
+          await updateUser();
+
+          console.log("6️⃣ Navigating...");
+
+          if (userType === "jobSeeker") {
+            navigate("/user-onboarding");
+          } else {
+            navigate("/company-onboarding");
           }
         }
-        setLoading(false);
       }
     } catch (error) {
-      setErrorMessage(error.response.data.message);
+      console.error("❌ Signup flow error:", error);
+
+      if (error.response) {
+        setErrorMessage(
+          error.response.data?.message || "Signup failed"
+        );
+      } else {
+        setErrorMessage("Server not responding");
+      }
+
       resetErrorMessage();
     } finally {
       setLoading(false);
+      console.log("Signup flow finished");
     }
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
   };
 
   return (
@@ -110,9 +134,9 @@ function Signup() {
               {userType === "jobSeeker"
                 ? "Find the job made for you."
                 : userType === "employer" &&
-                  (Math.random() > 0.5
-                    ? "Discover the perfect fit for your team."
-                    : "Unearth the gem your organization needs.")}
+                (Math.random() > 0.5
+                  ? "Discover the perfect fit for your team."
+                  : "Unearth the gem your organization needs.")}
             </h2>
 
             <p className="hidden sm:block font-light sm:pl-3 sm:text-lg text-white xl:text-xl xl:pl-16">
@@ -127,17 +151,15 @@ function Signup() {
           <div className="flex flex-col md:flex-row justify-center items-center gap-5 ">
             <div
               onClick={() => setUserType("jobSeeker")}
-              className={`rounded-md px-5 py-1 cursor-pointer font-semibold text-gray-600 ${
-                userType === "jobSeeker" ? "bg-black text-white" : "bg-gray-200"
-              }`}
+              className={`rounded-md px-5 py-1 cursor-pointer font-semibold text-gray-600 ${userType === "jobSeeker" ? "bg-black text-white" : "bg-gray-200"
+                }`}
             >
               I am a Job Seeker
             </div>
             <div
               onClick={() => setUserType("employer")}
-              className={`rounded-md px-5 py-1 cursor-pointer font-semibold text-gray-600 ${
-                userType === "employer" ? "bg-black text-white" : "bg-gray-200"
-              }`}
+              className={`rounded-md px-5 py-1 cursor-pointer font-semibold text-gray-600 ${userType === "employer" ? "bg-black text-white" : "bg-gray-200"
+                }`}
             >
               I am an Employer
             </div>
@@ -163,9 +185,8 @@ function Signup() {
                   value={formData.name}
                   onChange={handleInputChange}
                   className="rounded h-10 text-base pl-5 mb-3 border-x border-y border-gray-400"
-                  placeholder={`Enter ${
-                    userType === "employer" ? "company name" : "name"
-                  }`}
+                  placeholder={`Enter ${userType === "employer" ? "company name" : "name"
+                    }`}
                 />
 
                 <label className=" font-semibold">Email Address:</label>

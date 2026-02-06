@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/media/JobHunter.png";
 import { userService } from "../../services/userService";
@@ -9,58 +9,93 @@ function Login() {
   const updateUser = useUpdateUserData();
 
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-  const [errorMessage, setErrorMessage] = useState("");
+
   const resetErrorMessage = () => {
-    setTimeout(() => {
-      setErrorMessage("");
-    }, 5000);
+    setTimeout(() => setErrorMessage(""), 5000);
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
+
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
     }));
   };
 
   const handleFormSubmission = (e) => {
     e.preventDefault();
+    console.log("🚀 Form Submitted:", formData);
     makeLoginRequest(formData);
   };
 
-  const makeLoginRequest = async (userData) => {
+  const makeLoginRequest = async (loginData) => {
+    console.log("🔐 Starting login request...", loginData);
     setLoading(true);
+
     try {
-      const res = await userService.login(userData);
-      if (res.status === 200) {
-        const userData = await userService.getCurrentUser();
-        if (userData) {
-          await updateUser();
-          if (userData.role === "jobSeeker") {
-            if (userData.userProfile.doneOnboarding === true) {
-              navigate("/");
-            } else {
-              navigate("/user-onboarding");
-            }
-          } else if (userData.role === "employer") {
-            if (userData.userProfile.doneOnboarding === true) {
-              console.log("Sending to dashboard");
-              navigate("/dashboard/home");
-            } else {
-              console.log(userData);
-              navigate("/company-onboarding");
-            }
-          }
+      // STEP 1: LOGIN API
+      const loginRes = await userService.login(loginData);
+
+      if (!loginRes) {
+        throw new Error("Login API returned nothing");
+      }
+
+      // STEP 2: FETCH CURRENT USER
+      // console.log("👤 Fetching current user...");
+      const currentUser = await userService.getCurrentUser();
+      // console.log("👤 Current user response:", currentUser);
+
+      if (!currentUser) {
+        throw new Error("Current user is undefined/null");
+      }
+
+      // STEP 3: UPDATE GLOBAL STATE
+      await updateUser();
+
+      // // STEP 4: ROLE CHECK
+      // console.log("🧭 User role:", currentUser.role);
+      // console.log("🧭 Onboarding status:", currentUser.userProfile?.doneOnboarding);
+
+      if (currentUser.role === "jobSeeker") {
+        if (currentUser.userProfile?.doneOnboarding) {
+          navigate("/");
+        } else {
+          console.log("➡️ Redirecting jobSeeker to onboarding");
+          navigate("/user-onboarding");
+        }
+      }
+
+      if (currentUser.role === "employer") {
+        if (currentUser.userProfile?.doneOnboarding) {
+          console.log("➡️ Redirecting employer to dashboard");
+          navigate("/dashboard/home");
+        } else {
+          console.log("➡️ Redirecting employer to company onboarding");
+          navigate("/company-onboarding");
         }
       }
     } catch (error) {
-      setErrorMessage(error.response.data.message);
+      console.error("❌ Login flow failed:", error);
+
+      // AXIOS ERROR CHECK
+      if (error.response) {
+
+        setErrorMessage(
+          error.response.data?.message || "Invalid email or password"
+        );
+      } else if (error.request) {
+        setErrorMessage("Server not responding");
+      } else {
+        setErrorMessage(error.message);
+      }
+
       resetErrorMessage();
     } finally {
       setLoading(false);

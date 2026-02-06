@@ -88,8 +88,8 @@ function UserOnboaring() {
     };
     try {
       const res = await userService.updateUserProfile(data);
-      console.log(res);
-      if (res.status === 200) {
+      console.log("Update response:", res);
+      if (res) {
         navigate("/jobs");
       }
     } catch (error) {

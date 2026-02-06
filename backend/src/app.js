@@ -5,10 +5,7 @@ import { PRODUCTION_URL } from "./constants.js";
 export const app = express();
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? `${PRODUCTION_URL}`
-        : "http://localhost:5173",
+    origin: "http://localhost:5173",
     credentials: true,
   })
 );

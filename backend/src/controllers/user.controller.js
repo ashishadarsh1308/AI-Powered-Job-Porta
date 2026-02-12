@@ -219,7 +219,9 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     return res.status(404).send();
   }
 
-  res.send(user);
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "User profile updated successfully"));
 });
 
 const updateProfilePicture = asyncHandler(async (req, res) => {

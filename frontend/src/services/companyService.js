@@ -7,13 +7,18 @@ export const companyService = {
   getCompanyJobListings,
   generateJobDescription,
   getActiveJobListings,
-  getNonActiveJobListings,
   getAllApplications,
   getShortListedCandidates,
   shortlistCandidate,
   removeApplication,
+  removeApplication,
   removeFromShortlist,
+  deleteJob,
 };
+
+async function deleteJob(id) {
+  return await apiCall("delete", `/jobs/${id}`);
+}
 
 async function getAllJobListings() {
   return apiCall("get", "/company/listings");

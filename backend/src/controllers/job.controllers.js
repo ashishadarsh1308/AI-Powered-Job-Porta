@@ -162,6 +162,16 @@ const getJobById = asyncHandler(async (req, res, next) => {
   if (!job) {
     return next(new ApiError(404, "Job not found in the database"));
   }
+
+  let hasApplied = false;
+  if (req.user && jobCopy.applicants.includes(req.user._id)) {
+    hasApplied = true;
+  }
+
+  // Convert the Mongoose document to a plain JavaScript object if not already
+  // (job is already toObject from earlier)
+  job.hasApplied = hasApplied;
+
   return res
     .status(200)
     .json(new ApiResponse(200, job, "Job fetched successfully"));
@@ -216,6 +226,10 @@ const sendJobDescription = asyncHandler(async (req, res) => {
   }
 
   const response = await generateJobDescription(jobDetails);
+
+  if (!response) {
+    throw new ApiError(500, "Failed to generate job description");
+  }
 
   if (response) {
     user.userProfile.aiUseLimit -= 1;

@@ -1,4 +1,4 @@
-import apiClient from "./apiBase";
+import { apiCall } from "./apiBase";
 
 export const companyService = {
   postNewJob,

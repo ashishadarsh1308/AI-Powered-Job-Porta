@@ -72,7 +72,10 @@ function AboutForm({ userData }) {
     e.preventDefault();
     try {
       setUpdating(true);
-      const res = await userService.updateUserProfile(formData);
+      // Create a copy of formData excluding profilePicture to reduce payload size
+      // The profile picture is uploaded separately via handleFileChange
+      const { profilePicture, ...submitData } = formData;
+      const res = await userService.updateUserProfile(submitData);
       if (res.status === 200) {
         setIsChanged(false);
       }

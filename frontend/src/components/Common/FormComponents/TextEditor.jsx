@@ -27,9 +27,8 @@ function TextEditor({
         {aiButton && (
           <div className="flex justify-end">
             <span
-              className={`bg-black w-36 py-1 px-1 text-xs text-white text-center rounded cursor-pointer ${
-                generatingDescription ? "hover:cursor-wait" : ""
-              }`}
+              className={`bg-black w-36 py-1 px-1 text-xs text-white text-center rounded cursor-pointer ${generatingDescription ? "hover:cursor-wait" : ""
+                }`}
               onClick={handleGenerate}
             >
               {generatingDescription
@@ -48,10 +47,19 @@ function TextEditor({
         value={value}
         onEditorChange={handleEditorChange}
         init={{
-          plugins:
-            "autolink charmap codesample emoticons link lists  searchreplace  visualblocks wordcount checklist casechange  pageembed permanentpen footnotes  advcode  mergetags powerpaste tinymcespellchecker autocorrect a11ychecker typography inlinecss",
-          toolbar:
-            "undo redo | blocks | bold italic underline strikethrough |  mergetags | align  | checklist numlist bullist indent outdent | emoticons charmap | removeformat",
+          plugins: [
+            "anchor", "autolink", "charmap", "codesample", "emoticons", "link", "lists", "media", "searchreplace", "table", "visualblocks", "wordcount",
+            "checklist", "mediaembed", "casechange", "formatpainter", "pageembed", "a11ychecker", "tinymcespellchecker", "permanentpen", "powerpaste", "advtable", "advcode", "advtemplate", "ai", "uploadcare", "mentions", "tinycomments", "tableofcontents", "footnotes", "mergetags", "autocorrect", "typography", "inlinecss", "markdown", "importword", "exportword", "exportpdf"
+          ],
+          toolbar: "undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography uploadcare | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat",
+          tinycomments_mode: "embedded",
+          tinycomments_author: "Author name",
+          mergetags_list: [
+            { value: "First.Name", title: "First Name" },
+            { value: "Email", title: "Email" },
+          ],
+          ai_request: (request, respondWith) => respondWith.string(() => Promise.reject("See docs to implement AI Assistant")),
+          uploadcare_public_key: "a7498fd19d7cd18505e6",
           branding: false,
           menubar: false,
           height: "20rem",

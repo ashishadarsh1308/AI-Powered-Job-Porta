@@ -401,4 +401,24 @@ export {
   getCompanies,
   getSavedJobs,
   removeSavedJob,
+  deleteJob,
 };
+
+const deleteJob = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const job = await Job.findById(id);
+
+  if (!job) {
+    throw new ApiError(404, "Job not found");
+  }
+
+  if (job.employer.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "You are not authorized to delete this job");
+  }
+
+  await Job.findByIdAndDelete(id);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Job deleted successfully"));
+});

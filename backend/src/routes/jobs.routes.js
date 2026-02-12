@@ -10,6 +10,7 @@ import {
   removeSavedJob,
   saveJob,
   sendJobDescription,
+  deleteJob,
 } from "../controllers/job.controllers.js";
 import { authPing } from "../controllers/user.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -22,7 +23,7 @@ router.route("/ping").get(ping);
 router.route("/auth-ping").get(verifyJWT, authPing);
 
 router.route("/jobs").get(getJobs);
-router.route("/jobs/:id?").get(getJobById);
+router.route("/jobs/:id?").get(getJobById).delete(verifyJWT, deleteJob);
 router.route("/jobs").post(verifyJWT, postJob);
 router.route("/generate-job-description").post(verifyJWT, sendJobDescription);
 router.route("/apply/:id?").post(verifyJWT, applyForJob);

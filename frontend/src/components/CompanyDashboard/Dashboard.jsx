@@ -46,6 +46,18 @@ function Dashboard() {
     navigate(`/job/${id}`);
   };
 
+  const handleDeleteJob = async (id) => {
+    if (window.confirm("Are you sure you want to delete this job?")) {
+      try {
+        await companyService.deleteJob(id);
+        fetchData(); // Refresh the list
+      } catch (error) {
+        console.error("Error deleting job:", error);
+        alert("Failed to delete job");
+      }
+    }
+  };
+
   return (
     <div className="px-5">
       <div className="flex flex-wrap justify-between px-5 gap-2 my-8">
@@ -100,28 +112,36 @@ function Dashboard() {
                 <TableHeaderCell>Job Title</TableHeaderCell>
                 <TableHeaderCell>Applications</TableHeaderCell>
                 <TableHeaderCell>Status</TableHeaderCell>
-                <TableHeaderCell>View Job</TableHeaderCell>
+                <TableHeaderCell>Actions</TableHeaderCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {jobData.map((job, index) => (
                 <TableRow key={index}>
                   <TableCell>{job.title}</TableCell>
-                  <TableCell>
-                    <TableCell>{job?.applicants.length}</TableCell>
-                  </TableCell>
+                  <TableCell>{job?.applicants.length}</TableCell>
                   <TableCell>
                     <Badge color={job.active === true ? "emerald" : "red"}>
                       {job.active ? "active" : "inactive"}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      color="black"
-                      onClick={() => redirectToDetail(job._id)}
-                    >
-                      View Job
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        color="black"
+                        onClick={() => redirectToDetail(job._id)}
+                        size="xs"
+                      >
+                        View
+                      </Button>
+                      <Button
+                        color="red"
+                        onClick={() => handleDeleteJob(job._id)}
+                        size="xs"
+                      >
+                        Delete
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

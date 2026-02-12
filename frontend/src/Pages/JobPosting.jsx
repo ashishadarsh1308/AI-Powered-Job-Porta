@@ -36,7 +36,7 @@ function JobPosting() {
     benefits: [],
     applicationDeadline: "",
     workMode: "",
-    additionalRequirements: [],
+    additionalRequirements: "",
     urgent: false,
     numberOfOpenings: 0,
     primaryRole: "software_engineer",
@@ -95,17 +95,24 @@ function JobPosting() {
   };
 
   const handleGenerate = async () => {
-    formData.employer = userData.userProfile.companyName;
-    if (formData.hasOwnProperty("description")) {
-      delete formData.description;
+    // Create a copy to avoid mutating state
+    const dataToSend = { ...formData };
+    dataToSend.employer = userData.userProfile.companyName;
+
+    if (dataToSend.hasOwnProperty("description")) {
+      delete dataToSend.description;
     }
 
-    if (formData.hasOwnProperty("urgent")) {
-      delete formData.urgent;
+    if (dataToSend.hasOwnProperty("urgent")) {
+      delete dataToSend.urgent;
     }
 
-    for (let field in formData) {
-      if (field !== "description" && field !== "urgent" && !formData[field]) {
+    for (let field in dataToSend) {
+      if (
+        field !== "description" &&
+        field !== "urgent" &&
+        !dataToSend[field]
+      ) {
         setDialog({
           isOpen: true,
           title: "Incomplete Form",
@@ -118,12 +125,15 @@ function JobPosting() {
     }
     setGeneratingDescription(true);
     try {
-      const res = await companyService.generateJobDescription(formData);
+      const res = await companyService.generateJobDescription(dataToSend);
 
       setGeneratingDescription(false);
       setFormData({ ...formData, description: res.data.data });
     } catch (error) {
-      if (error.response.data.message.includes("Quota exceeded")) {
+      const errorMessage =
+        error.response?.data?.message || error.message || "Unknown error";
+
+      if (errorMessage.includes("Quota exceeded")) {
         setDialog({
           isOpen: true,
           title: "Quota Exceeded",
@@ -134,8 +144,8 @@ function JobPosting() {
       } else {
         setDialog({
           isOpen: true,
-          title: "Error genetating job description",
-          message: error.response.data.message,
+          title: "Error generating job description",
+          message: errorMessage,
           buttonText: "OK",
         });
       }
@@ -161,10 +171,12 @@ function JobPosting() {
         onClose: () => navigate("/dashboard/home"),
       });
     } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || error.message || "Unknown error";
       setDialog({
         isOpen: true,
         title: "Error Posting Job",
-        message: error.response.data.message,
+        message: errorMessage,
         buttonText: "Okay",
       });
     }

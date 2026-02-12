@@ -51,21 +51,17 @@ ${JSON.stringify(jobDetails, null, 2)}
 
 `;
 
-  try {
-    const gptResponse = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        { role: "system", content: "You are a helpful assistant." },
-        { role: "user", content: prompt },
-      ],
-      temperature: 1,
-      max_tokens: 700,
-    });
+  const gptResponse = await openai.chat.completions.create({
+    model: "gpt-3.5-turbo",
+    messages: [
+      { role: "system", content: "You are a helpful assistant." },
+      { role: "user", content: prompt },
+    ],
+    temperature: 1,
+    max_tokens: 700,
+  });
 
-    return gptResponse.choices[0].message.content;
-  } catch (error) {
-    console.log("[CONVERSATION_ERROR]", error);
-  }
+  return gptResponse.choices[0].message.content;
 }
 
 export { generateJobDescription };

@@ -92,7 +92,7 @@ function WorkExperienceForm({
     try {
       const res = await userService.updateUserProfile(update);
       setSaving(false);
-      if (res.status === 200) {
+      if (res) {
         updateUser();
         setShowAddWorkExperience(false);
         setWorkExperienceFormData(initialFormData);
